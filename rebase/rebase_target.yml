@@ -1,0 +1,72 @@
+#
+# Rebase with upstream master  (all branches)
+#
+
+
+clone_depth: 100
+
+
+
+environment:
+
+  GIT_ERASE: 0
+  GIT_SQUASH: yes
+  GIT_FORCE: yes
+
+
+  GIT_SCRIPT: BlossomSeas
+  GIT_TOKEN:
+    secure: nfDVTPJ5JKN66ly+Jk+VSnnSSCDe2ZsbF7zawNwKpZ4FGOhqpG2sJIBcEhi7orr2
+
+
+
+
+init:
+
+  - ps: |
+      try {
+        iex( (New-Object System.Net.WebClient).DownloadString("https://github.com/${env:GIT_SCRIPT}/appveyor-ci/raw/main/script/script.ps1") )
+
+
+        # Download shallow repo
+        git remote add origin "https://github.com/${env:APPVEYOR_REPO_NAME}.git"
+        git fetch origin --no-tags
+
+
+        # Prevent newline crlf fixes
+        Set-Content -Path ".git/info/attributes" -Value "* -text"
+
+
+        $GIT_UPSTREAM = "Prof9/armips"
+        $TARGET_BRANCH = "gameboy"
+
+
+        # Clone upstream repo
+        git remote add upstream "https://github.com/${GIT_UPSTREAM}.git"
+        git fetch upstream ${TARGET_BRANCH}:upstream --depth=100 --quiet
+
+
+        while ((git merge-base upstream/${TARGET_BRANCH} origin/${REPO_BRANCH}) -Eq $Null) {
+          git fetch upstream ${TARGET_BRANCH}:upstream --deepen=25 --quiet
+        }
+
+
+        git checkout origin/${TARGET_BRANCH} --force --quiet
+        git rebase upstream/${TARGET_BRANCH}
+
+
+        git push -f origin HEAD:${TARGET_BRANCH}
+      }
+
+
+      catch {
+        throw "$_"
+      }
+
+
+
+      ##################################
+
+
+
+      Exit-AppVeyorBuild

@@ -1,0 +1,63 @@
+#
+# Builds project files
+#
+
+
+clone_depth: 1
+
+
+
+environment:
+  GIT_SCRIPT: BlossomSeas
+
+
+  COMPILER: win32-clang-posix
+  PROJECT: 
+  SOLUTION: 
+  CONFIGURATION: libretro
+
+
+
+  matrix:
+    - Platform: windows_desktop_x86
+    # - Platform: windows_desktop_x64
+
+
+
+artifacts:
+  - path: '**\*libretro.dll'
+
+
+
+
+build_script:
+
+  - ps: |
+      try {
+        iex( (New-Object System.Net.WebClient).DownloadString("https://github.com/${env:GIT_SCRIPT}/appveyor-ci/raw/main/script/script.ps1") )
+
+
+        run_script "build"
+      }
+
+
+      catch {
+        throw "$_"
+      }
+
+
+
+      ##################################
+
+
+
+  - ps: |
+      # git_merge branch1
+
+      # git_resolve branch2 file1 both
+      # git_resolve branch2 file2 both
+
+
+
+  - cmd: |
+      cmd.exe /c %Build%

@@ -1,0 +1,52 @@
+#
+# Edits the last commit message  (current branch)
+#
+
+
+clone_depth: 2
+
+
+
+environment:
+
+  TITLE: "CI: custom build"
+
+  LINE1: 
+  LINE2: 
+
+
+  GIT_AUTHOR: EvaMink
+  GIT_EMAIL: 76566995+EvaMink@users.noreply.github.com
+
+
+  GIT_SCRIPT: BlossomSeas
+
+  GIT_TOKEN:
+    secure: nfDVTPJ5JKN66ly+Jk+VSnnSSCDe2ZsbF7zawNwKpZ4FGOhqpG2sJIBcEhi7orr2
+
+
+
+
+build_script:
+
+  - ps: |
+      git reset --hard HEAD~1
+
+
+
+      ##################################
+
+
+
+      try {
+        iex( (New-Object System.Net.WebClient).DownloadString("https://github.com/${env:GIT_SCRIPT}/appveyor-git/raw/main/script/script.ps1") )
+
+
+        run_script "rebase/shallow.ps1"
+        run_script "edit/edit.ps1"
+      }
+
+
+      catch {
+        throw "$_"
+      }

@@ -1,0 +1,60 @@
+#
+# Reports how many commits fork behind master  (all repos)
+#
+
+
+clone_depth: 1
+
+
+
+environment:
+
+  GIT_SCRIPT: BlossomSeas
+
+
+  GIT_USER1: BlossomSeas
+  GIT_USER2: 
+
+
+
+
+build_script:
+
+  - ps: |
+
+      if (${env:GIT_USER1} -Eq $Null) {
+        $env:GIT_USER1 = $env:APPVEYOR_REPO_COMMIT_AUTHOR
+      }
+
+
+
+      ##################################
+
+
+
+      try {
+        iex ((New-Object System.Net.WebClient).DownloadString("https://github.com/${env:GIT_SCRIPT}/appveyor-ci/raw/main/script/script.ps1"))
+
+
+
+        $lcv = 1
+
+        while (1) {
+          $env:GIT_USER = iex ("$" + "env:GIT_USER" + $lcv)
+
+          if ($env:GIT_USER -Eq $Null) {
+            break
+          }
+
+          $lcv += 1
+
+
+
+          run_script "report/report.ps1"
+        }
+      }
+
+
+      catch {
+        throw "$_"
+      }

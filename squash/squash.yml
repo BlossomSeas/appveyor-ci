@@ -1,0 +1,61 @@
+#
+# Combines all commits from repo author  (current branch)
+#
+
+
+clone_depth: 2
+
+
+
+environment:
+
+  GIT_SCRIPT: BlossomSeas
+
+
+  GIT_SQUASH: yes
+
+
+  GIT_AUTHOR: 
+  GIT_EMAIL: 
+
+
+  GIT_TOKEN:
+    secure: nfDVTPJ5JKN66ly+Jk+VSnnSSCDe2ZsbF7zawNwKpZ4FGOhqpG2sJIBcEhi7orr2
+
+
+
+
+build_script:
+
+  - ps: |
+      git reset --hard HEAD~1
+
+
+
+      ##################################
+
+
+
+      try {
+        iex(( New-Object System.Net.WebClient).DownloadString( "https://github.com/${env:GIT_SCRIPT}/appveyor-git/raw/main/script/script.ps1" ))
+
+        run_script "rebase/shallow.ps1"
+        run_script "squash/squash.ps1"
+      }
+
+
+      catch {
+        throw "$_"
+      }
+
+
+
+      ##################################
+
+
+
+      git push -f origin HEAD:${env:APPVEYOR_REPO_BRANCH}
+
+
+      echo "`n`n"
+      git log -1
